@@ -8,7 +8,7 @@ import tensorflow
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.layers import GlobalMaxPooling2D
 from tensorflow.keras.applications.resnet50 import ResNet50,preprocess_input
-from sklearn.neighbors import NearestNeighbors
+from annoy import AnnoyIndex
 from numpy.linalg import norm
 
 
@@ -20,9 +20,18 @@ model = tensorflow.keras.Sequential([
     GlobalMaxPooling2D()
 ])
 
-feature_list = pickle.load(open('embedding.pkl','rb'))
-
+# Load filenames
 filenames = pickle.load(open('filenames.pkl','rb'))
+
+# Load pre-built Annoy index for fast similarity search
+@st.cache_resource
+def load_annoy_index():
+    f = 2048  # ResNet50 feature dimension
+    annoy_index = AnnoyIndex(f, 'euclidean')
+    annoy_index.load('annoy_index.ann')
+    return annoy_index
+
+annoy_index = load_annoy_index()
 
 
 st.title("Fashion Recommnder System")
@@ -44,12 +53,14 @@ def feature_extraction(img_path,model):
     normalized_result = result / norm(result)
     return normalized_result
 
-def recommend(features, feature_list):
-    neighbors = NearestNeighbors(n_neighbors=5,algorithm='brute',metric='euclidean')
-    neighbors.fit(feature_list)
-
-    distances,indices = neighbors.kneighbors([features])
-
+def recommend(features, annoy_index):
+    """
+    Find similar images using Annoy index.
+    Much faster than sklearn NearestNeighbors for large datasets.
+    """
+    n_neighbors = 5
+    # search_k=-1 uses default (n_trees * n_neighbors) for good accuracy
+    indices = annoy_index.get_nns_by_vector(features, n_neighbors, search_k=-1, include_distances=False)
     return indices
 
 
@@ -65,20 +76,20 @@ if uploaded_file is not None:
         features = feature_extraction(os.path.join("uploads", uploaded_file.name), model)
         # st.text(features)
         # recommendation 
-        indices = recommend(features, feature_list)
+        indices = recommend(features, annoy_index)
         # -> display
         col1,col2,col3,col4,col5 = st.columns(5)
 
         with col1:
-            st.image(filenames[indices[0][0]])
+            st.image(filenames[indices[0]])
         with col2:
-            st.image(filenames[indices[0][1]])
+            st.image(filenames[indices[1]])
         with col3:
-            st.image(filenames[indices[0][2]])
+            st.image(filenames[indices[2]])
         with col4:
-            st.image(filenames[indices[0][3]])
+            st.image(filenames[indices[3]])
         with col5:
-            st.image(filenames[indices[0][4]])
+            st.image(filenames[indices[4]])
     else:
         st.header('some error occured')
 
