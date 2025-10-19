@@ -1,0 +1,120 @@
+# ---- OS / Editor ----
+# macOS/Windows metadata
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# VS Code / JetBrains
+.vscode/
+.idea/
+*.code-workspace
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+.conda/
+
+# Packaging / build artifacts
+build/
+dist/
+.eggs/
+*.egg-info/
+*.egg
+wheels/
+share/python-wheels/
+pip-wheel-metadata/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+hypothesis/
+.hypothesis/
+.pytype/
+htmlcov/
+
+# Type checking / linters
+.mypy_cache/
+.dmypy.json
+.dmypy/
+.pyre/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints
+
+# Logs / runtime
+logs/
+*.log
+
+# Sphinx / docs
+docs/_build/
+
+# Databases (common local)
+*.db
+*.sqlite
+*.sqlite3
+
+# dotenv / secrets
+.env
+.env.*
+*.env
+.envrc
+
+# ---- ML / Data artifacts ----
+# Datasets and experiment outputs (customize as needed)
+data/
+datasets/
+mlruns/
+wandb/
+tensorboard/
+tb_logs/
+lightning_logs/
+checkpoints/
+model_checkpoints/
+outputs/
+
+# Model/weight files
+*.ckpt
+*.pt
+*.pth
+*.onnx
+*.tflite
+*.pb
+*.h5
+*.weights
+
+# Serialized artifacts
+*.pkl
+*.joblib
+*.pickle
+
+# Keep these specific pickles in repo if they are required at runtime
+!embedding.pkl
+!filenames.pkl
+
+# Large image folders
+# Ignore these heavy local-only asset folders at the repo root
+/New Images/
+/sample/
+
+# Misc caches
+.cache/
+__pypackages__/
+
+#--
