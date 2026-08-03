@@ -12,7 +12,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 # 5. COPY CODE & DATABASE: Copy your FastAPI script AND your built database!
 COPY api.py .
-COPY chroma_storage/ ./chroma_storage/
+# We NO LONGER copy the database here! 
+# The database will be mounted as a Volume on the EC2 server for CI/CD.
 
 # Expose port 80 so AWS allows web traffic to hit your API
 EXPOSE 80

@@ -75,6 +75,7 @@ docs/_build/
 .env.*
 *.env
 .envrc
+*.pem
 
 # ---- ML / Data artifacts ----
 # Datasets and experiment outputs (customize as needed)
