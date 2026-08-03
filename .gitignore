@@ -105,11 +105,12 @@ outputs/
 *.pickle
 
 # Keep these specific pickles in repo if they are required at runtime
-!embedding.pkl
-!filenames.pkl
+# (None needed for this architecture)
 
-# Large image folders
-# Ignore these heavy local-only asset folders at the repo root
+# Large image and DB folders
+/archive/
+/uploads/
+/chroma_storage/
 /New Images/
 /sample/
 

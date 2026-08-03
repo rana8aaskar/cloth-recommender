@@ -1,7 +1,8 @@
-tensorflow==2.3.1
-numpy==1.19.5
-scikit-learn==0.24.2
-Pillow==8.4.0
-tqdm==4.62.3
-annoy==1.17.0
-streamlit>=1.0.0
+tensorflow
+keras
+numpy
+Pillow
+fastapi
+uvicorn
+python-multipart
+chromadb
