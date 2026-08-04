@@ -86,15 +86,26 @@ async def recommend_fashion(file: UploadFile = File(...), num_results: int = 5):
         # 3. Format the Response
         # ChromaDB returns a dictionary with 'ids' and 'distances'
         recommended_filenames = results['ids'][0]
+        distances = results['distances'][0]
         
         # Prepend the AWS S3 Bucket URL to return fully working image links
         s3_base_url = "https://aaskar-fashion-images-2026.s3.ap-southeast-2.amazonaws.com/images/"
-        final_urls = [s3_base_url + filename for filename in recommended_filenames]
+        
+        final_recommendations = []
+        for i in range(len(recommended_filenames)):
+            # Convert cosine distance to a "Match Percentage" for the UI
+            distance = distances[i]
+            match_percentage = max(0, 100 - (distance * 50))
+            
+            final_recommendations.append({
+                "url": s3_base_url + recommended_filenames[i],
+                "match": f"{match_percentage:.1f}%"
+            })
         
         return {
             "success": True,
             "query_filename": file.filename,
-            "recommendations": final_urls
+            "recommendations": final_recommendations
         }
         
     except Exception as e:
