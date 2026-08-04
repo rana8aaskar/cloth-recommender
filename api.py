@@ -60,7 +60,7 @@ def extract_features_from_bytes(image_bytes):
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to the Fashion Recommendation Microservice!", "status": "Online"}
+    return {"message": "Welcome to the Fashion AI Microservice!", "status": "Online"}
 
 @app.post("/recommend")
 async def recommend_fashion(file: UploadFile = File(...), num_results: int = 5):
