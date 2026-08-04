@@ -6,3 +6,4 @@ fastapi
 uvicorn
 python-multipart
 chromadb
+boto3

@@ -11,7 +11,8 @@ from keras.preprocessing import image as keras_image
 from keras.layers import GlobalMaxPooling2D
 from keras.applications.resnet50 import ResNet50, preprocess_input
 import chromadb
-
+import boto3
+import uuid
 # 1. Initialize FastAPI App
 app = FastAPI(title="Fashion Recommender API", version="1.0.0")
 
@@ -126,3 +127,69 @@ async def recommend_fashion(file: UploadFile = File(...), num_results: int = 5):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/add_to_catalog")
+async def add_to_catalog(file: UploadFile = File(...)):
+    """
+    Receives an image, extracts features, uploads it to S3, and adds it dynamically to ChromaDB.
+    """
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="File must be an image.")
+
+    try:
+        import time
+        start_time = time.time()
+        
+        # 1. Read the image
+        image_bytes = await file.read()
+        file_size_kb = len(image_bytes) / 1024
+        
+        # 2. Upload to S3
+        # Ensure AWS Credentials are in the environment (passed by Docker)
+        s3 = boto3.client('s3')
+        bucket_name = "aaskar-fashion-images-2026"
+        
+        # Generate a unique ID for the new image (e.g. custom-123456.jpg)
+        unique_id = f"custom-{uuid.uuid4().hex[:8]}.jpg"
+        s3_key = f"images/{unique_id}"
+        
+        s3_start = time.time()
+        s3.put_object(
+            Bucket=bucket_name,
+            Key=s3_key,
+            Body=image_bytes,
+            ContentType=file.content_type
+        )
+        s3_time = time.time() - s3_start
+        
+        # 3. Extract 2048 Features
+        vector_start = time.time()
+        new_vector = extract_features_from_bytes(image_bytes)
+        vector_time = time.time() - vector_start
+        
+        # 4. Dynamically add to ChromaDB!
+        chroma_start = time.time()
+        collection.add(
+            embeddings=[new_vector],
+            ids=[unique_id] # The ID matches the S3 filename!
+        )
+        chroma_time = time.time() - chroma_start
+        
+        total_time = time.time() - start_time
+        
+        real_logs = [
+            f"[EC2] Received image payload: {file_size_kb:.2f} KB",
+            f"[EC2] Uploaded to S3 bucket ({bucket_name}) in {s3_time:.3f}s",
+            f"[EC2] Extracted 2048-dimensional feature vector in {vector_time:.3f}s",
+            f"[EC2] Dynamically inserted into ChromaDB HNSW Graph in {chroma_time:.3f}s",
+            f"[EC2] Success: {unique_id} is now live in the catalog!"
+        ]
+        
+        return {
+            "success": True,
+            "message": f"Successfully added {unique_id} to the AI catalog.",
+            "logs": real_logs
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to add to catalog: {str(e)}")

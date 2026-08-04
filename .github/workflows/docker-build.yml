@@ -44,5 +44,10 @@ jobs:
             # 3. Pull the brand new image from Docker Hub
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/fashion-api:latest
             
-            # 4. Start the new container with the Volume Mount!
-            sudo docker run -d -p 80:80 -v /home/ubuntu/chroma_storage:/app/chroma_storage ${{ secrets.DOCKER_USERNAME }}/fashion-api:latest
+            # 4. Start the new container with Volume Mount and AWS Credentials!
+            sudo docker run -d -p 80:80 \
+              -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
+              -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+              -e AWS_DEFAULT_REGION=${{ secrets.AWS_REGION }} \
+              -v /home/ubuntu/chroma_storage:/app/chroma_storage \
+              ${{ secrets.DOCKER_USERNAME }}/fashion-api:latest
