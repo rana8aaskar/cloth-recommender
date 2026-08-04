@@ -71,41 +71,57 @@ async def recommend_fashion(file: UploadFile = File(...), num_results: int = 5):
         raise HTTPException(status_code=400, detail="File must be an image.")
 
     try:
+        import time
+        start_time = time.time()
+        
         # Read the image the user uploaded
         image_bytes = await file.read()
+        file_size_kb = len(image_bytes) / 1024
         
         # 1. Convert Image to Numbers (2048 Vector)
+        vector_start = time.time()
         query_vector = extract_features_from_bytes(image_bytes)
+        vector_time = time.time() - vector_start
         
         # 2. Search ChromaDB (Instant Similarity Search!)
+        search_start = time.time()
         results = collection.query(
             query_embeddings=[query_vector],
             n_results=num_results
         )
+        search_time = time.time() - search_start
         
         # 3. Format the Response
-        # ChromaDB returns a dictionary with 'ids' and 'distances'
         recommended_filenames = results['ids'][0]
         distances = results['distances'][0]
-        
-        # Prepend the AWS S3 Bucket URL to return fully working image links
         s3_base_url = "https://aaskar-fashion-images-2026.s3.ap-southeast-2.amazonaws.com/images/"
         
         final_recommendations = []
         for i in range(len(recommended_filenames)):
-            # Convert cosine distance to a "Match Percentage" for the UI
             distance = distances[i]
             match_percentage = max(0, 100 - (distance * 50))
-            
             final_recommendations.append({
                 "url": s3_base_url + recommended_filenames[i],
                 "match": f"{match_percentage:.1f}%"
             })
+            
+        total_time = time.time() - start_time
+        
+        # 4. Generate Real Telemetry Logs
+        real_logs = [
+            f"[EC2] Received image payload: {file_size_kb:.2f} KB",
+            f"[EC2] ResNet50 preprocessing complete (shape: 1x224x224x3)",
+            f"[EC2] Extracted 2048-dimensional feature vector in {vector_time:.3f}s",
+            f"[EC2] ChromaDB vector search completed in {search_time:.3f}s",
+            f"[EC2] Mapped {num_results} UUIDs to AWS S3 Object URLs",
+            f"[EC2] Pipeline execution finished in {total_time:.3f}s"
+        ]
         
         return {
             "success": True,
             "query_filename": file.filename,
-            "recommendations": final_recommendations
+            "recommendations": final_recommendations,
+            "logs": real_logs
         }
         
     except Exception as e:
