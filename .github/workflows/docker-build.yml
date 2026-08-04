@@ -35,11 +35,14 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # 1. Pull the brand new image
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/fashion-api:latest
-            
-            # 2. Stop and remove the old container safely (if it exists)
+            # 1. Stop and remove the old container safely
             sudo docker rm -f $(sudo docker ps -aq) || true
             
-            # 3. Start the new container with the Volume Mount!
+            # 2. Force delete the cached image so AWS doesn't use the old one
+            sudo docker rmi -f ${{ secrets.DOCKER_USERNAME }}/fashion-api:latest || true
+            
+            # 3. Pull the brand new image from Docker Hub
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/fashion-api:latest
+            
+            # 4. Start the new container with the Volume Mount!
             sudo docker run -d -p 80:80 -v /home/ubuntu/chroma_storage:/app/chroma_storage ${{ secrets.DOCKER_USERNAME }}/fashion-api:latest
