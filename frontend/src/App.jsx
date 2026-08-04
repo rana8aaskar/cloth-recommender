@@ -87,7 +87,7 @@ function App() {
     formData.append('file', file);
     
     try {
-      const response = await fetch('http://3.107.8.12/recommend?num_results=5', {
+      const response = await fetch('/api/recommend?num_results=5', {
         method: 'POST',
         body: formData,
       });
@@ -126,7 +126,7 @@ function App() {
     formData.append('file', file);
     
     try {
-      const response = await fetch('http://3.107.8.12/add_to_catalog', {
+      const response = await fetch('/api/add_to_catalog', {
         method: 'POST',
         body: formData,
       });
