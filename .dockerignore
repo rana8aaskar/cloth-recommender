@@ -1,0 +1,11 @@
+# Do not copy frontend files or huge node_modules to the Amazon Python Backend Container
+frontend/
+node_modules/
+.git/
+.github/
+chroma_storage/
+archive/
+uploads/
+__pycache__/
+*.pyc
+.env

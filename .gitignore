@@ -120,4 +120,14 @@ outputs/
 __pypackages__/
 
 #--
-annoy_index.ann 
+annoy_index.ann
+
+# ---- Node & React (Frontend) ----
+node_modules/
+dist/
+build/
+.npm/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
